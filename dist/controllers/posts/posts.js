@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editPost = exports.createPost = exports.getAllPosts = void 0;
+exports.removePost = exports.editPost = exports.getPost = exports.createPost = exports.getAllPosts = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getAllPosts = (request, response) => __awaiter(void 0, void 0, void 0, function* () {
@@ -51,13 +51,56 @@ const createPost = (request, response) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.createPost = createPost;
-const editPost = (request, response) => {
-    const { title, content } = request.body;
-    if (!title || !content) {
+const getPost = (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = request.params;
+    try {
+        const post = yield prisma.post.findFirst({ where: { id } });
+        response.status(200).json(post);
+    }
+    catch (error) {
+        response.status(400).json({ message: "failed to get post" });
+    }
+});
+exports.getPost = getPost;
+const editPost = (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const { title, content, id } = request.body;
+    if (!title || !content || !id) {
         return response
             .status(400)
-            .json({ message: "content and title is required" });
+            .json({ message: "content, title and id is required" });
     }
-    return response.status(200).json({ title, content });
-};
+    try {
+        const updatedPost = yield prisma.post.update({
+            where: {
+                id,
+            },
+            data: {
+                title,
+                content,
+            },
+        });
+        return response.status(200).json(updatedPost);
+    }
+    catch (error) {
+        response.status(400).json({ message: "failed to update posts" });
+    }
+});
 exports.editPost = editPost;
+const removePost = (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = request.body;
+    if (!id) {
+        return response.status(400).json({ message: "id is required" });
+    }
+    try {
+        yield prisma.post.delete({
+            where: {
+                id,
+            },
+        });
+        response.status(204).json({ message: "success removed" });
+    }
+    catch (error) {
+        response.status(400).json({ message: "failed to remove posts" });
+    }
+});
+exports.removePost = removePost;

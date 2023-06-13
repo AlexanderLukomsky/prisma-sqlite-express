@@ -1,23 +1,21 @@
 import { Request, Response, Router } from "express";
 import { validateJWT } from "../middleware/auth";
-import { createPost, editPost, getAllPosts } from "../controllers/posts";
+import {
+  createPost,
+  editPost,
+  getAllPosts,
+  getPost,
+  removePost,
+} from "../controllers/posts";
 
 export const postsRouter = Router();
 
 postsRouter.get("/", validateJWT, getAllPosts);
 
-postsRouter.get(
-  "/:id",
-  validateJWT,
-  (request: Request, response: Response) => {}
-);
+postsRouter.get("/:id", validateJWT, getPost);
 
 postsRouter.post("/create", validateJWT, createPost);
 
-postsRouter.put("/edit/:id", validateJWT, editPost);
+postsRouter.put("/edit", validateJWT, editPost);
 
-postsRouter.delete(
-  "/remove/:id",
-  validateJWT,
-  (request: Request, response: Response) => {}
-);
+postsRouter.delete("/remove", validateJWT, removePost);
