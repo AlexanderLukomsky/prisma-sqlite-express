@@ -8,5 +8,5 @@ exports.postsRouter = (0, express_1.Router)();
 exports.postsRouter.get("/", auth_1.validateJWT, posts_1.getAllPosts);
 exports.postsRouter.get("/:id", auth_1.validateJWT, (request, response) => { });
 exports.postsRouter.post("/create", auth_1.validateJWT, posts_1.createPost);
-exports.postsRouter.put("/edit/:id", auth_1.validateJWT, (request, response) => { });
+exports.postsRouter.put("/edit/:id", auth_1.validateJWT, posts_1.editPost);
 exports.postsRouter.delete("/remove/:id", auth_1.validateJWT, (request, response) => { });

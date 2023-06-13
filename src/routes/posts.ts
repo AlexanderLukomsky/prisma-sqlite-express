@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import { validateJWT } from "../middleware/auth";
-import { createPost, getAllPosts } from "../controllers/posts";
+import { createPost, editPost, getAllPosts } from "../controllers/posts";
 
 export const postsRouter = Router();
 
@@ -14,11 +14,7 @@ postsRouter.get(
 
 postsRouter.post("/create", validateJWT, createPost);
 
-postsRouter.put(
-  "/edit/:id",
-  validateJWT,
-  (request: Request, response: Response) => {}
-);
+postsRouter.put("/edit/:id", validateJWT, editPost);
 
 postsRouter.delete(
   "/remove/:id",

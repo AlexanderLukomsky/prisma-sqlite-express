@@ -5,8 +5,11 @@ const prisma = new PrismaClient();
 
 export const getAllPosts = async (request: Request, response: Response) => {
   try {
-    const posts = await prisma.post.findMany();
-    console.log(posts);
+    const posts = await prisma.post.findMany({
+      where: {
+        authorId: request.body.user.id,
+      },
+    });
 
     response.status(200).json(posts);
   } catch (error) {
@@ -15,23 +18,21 @@ export const getAllPosts = async (request: Request, response: Response) => {
 };
 
 export const createPost = async (request: Request, response: Response) => {
-  try {
-    const author = await prisma.user.findFirst({
-      where: {
-        id: request.body.user.id,
-      },
-    });
+  const { content, title, user } = request.body;
 
-    if (author) {
+  try {
+    if (!content || !title) {
+      return response
+        .status(400)
+        .json({ message: "content and title is required" });
+    }
+
+    if (user) {
       const post = await prisma.post.create({
         data: {
-          content: "content",
-          title: "title",
-          author: {
-            connect: {
-              id: author.id,
-            },
-          },
+          content,
+          title,
+          authorId: user.id,
         },
       });
       return response.status(200).json(post);
@@ -39,8 +40,18 @@ export const createPost = async (request: Request, response: Response) => {
 
     return response.status(400).json({ message: "any error" });
   } catch (error) {
-    console.log(error);
-
-    response.status(400).json({ message: "failed to get posts" });
+    response.status(400).json({ message: "failed to create posts" });
   }
+};
+
+export const editPost = (request: Request, response: Response) => {
+  const { title, content } = request.body;
+
+  if (!title || !content) {
+    return response
+      .status(400)
+      .json({ message: "content and title is required" });
+  }
+
+  return response.status(200).json({ title, content });
 };

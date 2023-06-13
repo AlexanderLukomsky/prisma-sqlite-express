@@ -9,13 +9,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createPost = exports.getAllPosts = void 0;
+exports.editPost = exports.createPost = exports.getAllPosts = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const getAllPosts = (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const posts = yield prisma.post.findMany();
-        console.log(posts);
+        const posts = yield prisma.post.findMany({
+            where: {
+                authorId: request.body.user.id,
+            },
+        });
         response.status(200).json(posts);
     }
     catch (error) {
@@ -24,22 +27,19 @@ const getAllPosts = (request, response) => __awaiter(void 0, void 0, void 0, fun
 });
 exports.getAllPosts = getAllPosts;
 const createPost = (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const { content, title, user } = request.body;
     try {
-        const author = yield prisma.user.findFirst({
-            where: {
-                id: request.body.user.id,
-            },
-        });
-        if (author) {
+        if (!content || !title) {
+            return response
+                .status(400)
+                .json({ message: "content and title is required" });
+        }
+        if (user) {
             const post = yield prisma.post.create({
                 data: {
-                    content: "content",
-                    title: "title",
-                    author: {
-                        connect: {
-                            id: author.id,
-                        },
-                    },
+                    content,
+                    title,
+                    authorId: user.id,
                 },
             });
             return response.status(200).json(post);
@@ -47,8 +47,17 @@ const createPost = (request, response) => __awaiter(void 0, void 0, void 0, func
         return response.status(400).json({ message: "any error" });
     }
     catch (error) {
-        console.log(error);
-        response.status(400).json({ message: "failed to get posts" });
+        response.status(400).json({ message: "failed to create posts" });
     }
 });
 exports.createPost = createPost;
+const editPost = (request, response) => {
+    const { title, content } = request.body;
+    if (!title || !content) {
+        return response
+            .status(400)
+            .json({ message: "content and title is required" });
+    }
+    return response.status(200).json({ title, content });
+};
+exports.editPost = editPost;
