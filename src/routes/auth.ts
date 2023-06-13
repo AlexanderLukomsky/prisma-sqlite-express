@@ -1,17 +1,13 @@
 import { Router } from "express";
-import {
-  authValidation,
-  login,
-  nameValidation,
-  register,
-} from "../controllers/auth";
+import { login, register } from "../controllers/auth";
 import { validationMiddleware } from "../middleware/validationMiddleware";
+import { authValidation, nameValidation } from "../middleware/auth";
 
-export const userRouter = Router();
+export const authRouter = Router();
 
-userRouter.post("/login", authValidation, validationMiddleware, login);
+authRouter.post("/login", authValidation, validationMiddleware, login);
 
-userRouter.post(
+authRouter.post(
   "/register",
   authValidation,
   nameValidation,

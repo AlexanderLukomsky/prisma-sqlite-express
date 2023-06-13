@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.register = exports.login = void 0;
 const client_1 = require("@prisma/client");
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const helpers_1 = require("./helpers");
 const prisma = new client_1.PrismaClient();
 const login = (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = request.body;
@@ -26,10 +27,15 @@ const login = (request, response) => __awaiter(void 0, void 0, void 0, function*
     if (user) {
         const isCorrectPassword = yield bcrypt_1.default.compare(password, user.password);
         if (isCorrectPassword) {
-            return response.status(200).json({
-                name: user.name,
-                email: user.email,
+            const data = {
                 id: user.id,
+                email: user.email,
+                name: user.name,
+            };
+            const token = (0, helpers_1.getToken)(data);
+            return response.status(200).json({
+                data,
+                token,
             });
         }
     }
@@ -55,6 +61,20 @@ const register = (request, response) => __awaiter(void 0, void 0, void 0, functi
             password: hashedPassword,
         },
     });
-    response.send("register");
+    const data = {
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.name,
+    };
+    const token = (0, helpers_1.getToken)(data);
+    if (newUser) {
+        return response.status(201).json({
+            data,
+            token,
+        });
+    }
+    return response
+        .status(400)
+        .json({ message: "something went wrong, please try again later" });
 });
 exports.register = register;

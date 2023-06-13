@@ -16,7 +16,7 @@ model User{
   email    String
   password String
   name     String
-  post Post[]
+  posts    Post[]
 }
 
 model Post {
